@@ -1,7 +1,7 @@
-package com.iotics;
+package com.bnesbitt;
 
-import com.iotics.exceptions.InsufficientFunds;
-import com.iotics.exceptions.InvalidFunds;
+import com.bnesbitt.exceptions.InsufficientFunds;
+import com.bnesbitt.exceptions.InvalidFunds;
 
 import java.util.HashSet;
 
@@ -25,16 +25,16 @@ public class Barrier {
      */
     void swipeIn(Journey journey, OysterCard card) throws InsufficientFunds {
         System.out.println("Journey Starting at " + journey.start());
-        System.out.println("Current funds available: " + (card.balanceInPence()/100.0));
+        System.out.println("\tCurrent funds available: " + (card.balanceInPence()/100.0));
 
         if (journey.type() == Journey.Type.BUS) {
-            System.out.println("Charging bus fare at " + BUS_FARE);
+            System.out.println("\tCharging bus fare at " + BUS_FARE);
             card.debit(BUS_FARE);
-            return;
+        } else {
+            int price = getMaxFee(journey);
+            card.debit(price);
+            card.swipeIn();
         }
-
-        int price = getMaxFee(journey);
-        card.debit(price);
 
         ++passengersInTransit;
     }
@@ -51,24 +51,32 @@ public class Barrier {
      * @throws InvalidFunds If we attempt to credit the card with a negative amount.
      *                      That can only be done via debit.
      */
-    void swipeOut(Journey journey, OysterCard card) throws InvalidFunds {
-        System.out.println("Terminating journey at " + journey.end());
+    void swipeOut(Journey journey, OysterCard card) throws InvalidFunds, InsufficientFunds {
+        System.out.println("\tTerminating journey at " + journey.end());
 
         if (journey.type() == Journey.Type.BUS) {
+            card.swipeOut();
             return;
         }
 
         int maximumPrice = getMaxFee(journey);
         int minimumPrice = getMinFee(journey);
 
-        System.out.println("Reduced exit fee is: " + minimumPrice);
+        // Only charge back if the commuter has actually swiped in.
+        if (card.hasSwipedIn()) {
+            System.out.println("\tReduced exit fee is: " + minimumPrice);
 
-        if (maximumPrice > minimumPrice) {
-            int refund = maximumPrice - minimumPrice;
-            System.out.println("Refunding card with: " + refund);
-            card.credit(refund);
+            if (maximumPrice > minimumPrice) {
+                int refund = maximumPrice - minimumPrice;
+                System.out.println("\tRefunding card with: " + refund);
+                card.credit(refund);
+            }
+        } else {
+            // Tried to sneak through... hit them with the full charge.
+            card.debit(maximumPrice);
         }
 
+        card.swipeOut();
         --passengersInTransit;
     }
 
@@ -90,7 +98,7 @@ public class Barrier {
         if (results.size() == 1) {
             var currentZone = results.iterator().next();
             price = currentZone.getPriceInPence();
-            System.out.println("Charging " + price + " for travel in zone " + currentZone.getId());
+            System.out.println("\tCharging " + price + " for travel in zone " + currentZone.getId());
             return price;
         }
 
@@ -106,10 +114,10 @@ public class Barrier {
         }
 
         if (includesZone1) {
-            System.out.println("Journey is two zones including zone1, charging " + INCLUDES_ZONE1);
+            System.out.println("\tJourney is two zones including zone1, charging " + INCLUDES_ZONE1);
             price = INCLUDES_ZONE1;
         } else {
-            System.out.println("Journey is two zones excluding zone1, charging " + EXCLUDES_ZONE1);
+            System.out.println("\tJourney is two zones excluding zone1, charging " + EXCLUDES_ZONE1);
             price = EXCLUDES_ZONE1;
         }
 
@@ -127,7 +135,7 @@ public class Barrier {
         int minimumPrice = 0;
         for (Zone z : results) {
             minimumPrice += z.getPriceInPence();
-            System.out.println("Zone used for minimum exit price: " + z.getId());
+            System.out.println("\tZone used for minimum exit price: " + z.getId());
         }
 
         return minimumPrice;

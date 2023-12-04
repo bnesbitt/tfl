@@ -1,9 +1,9 @@
-package com.iotics;
+package com.bnesbitt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.iotics.exceptions.InsufficientFunds;
-import com.iotics.exceptions.InvalidFunds;
+import com.bnesbitt.exceptions.InsufficientFunds;
+import com.bnesbitt.exceptions.InvalidFunds;
 import org.junit.jupiter.api.Test;
 
 public class OysterCardTest {

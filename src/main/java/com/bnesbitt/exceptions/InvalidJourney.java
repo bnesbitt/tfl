@@ -1,4 +1,4 @@
-package com.iotics.exceptions;
+package com.bnesbitt.exceptions;
 
 public class InvalidJourney extends Exception {
 

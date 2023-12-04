@@ -1,4 +1,4 @@
-package com.iotics;
+package com.bnesbitt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class Zone implements Comparable<Zone> {
             stations.add(station);
             return true;
         } else {
-            System.err.printf("Can't add station [%s] to zone [%d], as it has already been added!");
+            System.err.printf("Can't add station [%s] to zone [%d], as it has already been added!", station, id);
             return false;
         }
     }
