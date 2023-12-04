@@ -12,6 +12,7 @@
 # Oyster Card
 
 **Requires JDK17**
+(https://adoptium.net/en-GB/)
 
 Operation:
 - When the user passes through the inward barrier at the station, their oyster card is charged
